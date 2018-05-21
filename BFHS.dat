@@ -1,0 +1,20 @@
+# Data from the British Family Heart Study
+# 
+# Reference:  Thompson, Simon G., Pyke, Stephen D., and Hardy, Rebecca J. (1997)
+#             ``The design and analysis of paired cluster randomized trials:
+#               An application of meta-analysis techniques,'' 
+#             \emph{Statistics in Medicine}, 16, 2063--2079.
+Town          Intervention  ExternalComparison
+Portsmouth    5.574         5.742
+Darlington    5.812         5.831
+Gloucester    5.651         5.714
+Carlisle      5.438         6.067
+Burton        5.595         5.702
+Lincoln       5.530         5.717
+Dunfermline   5.786         5.621
+Bridgend      5.553         5.415
+Bury          5.533         5.624
+Huddersfield  5.594         5.752
+Ipswich       5.391         5.585
+Newport       5.629         5.619
+Poole         5.370         5.515
