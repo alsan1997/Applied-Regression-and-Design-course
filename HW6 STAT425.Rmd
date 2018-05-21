@@ -1,0 +1,95 @@
+---
+title: "HW6 STAT425"
+author: "Aldo Sanjoto"
+date: "December 1, 2017"
+output: html_document
+---
+
+####1a)
+```{r}
+bfhs = read.table("BFHS.dat", header = TRUE)
+summary(bfhs)
+```
+```{r}
+dif = bfhs$Intervention - bfhs$ExternalComparison
+t.test(dif)
+
+```
+
+####1b) No significance difference between the intervention and external comparison as the p-value is greater than 0.05
+
+```{r}
+tstats = replicate(100000, t.test(dif * sample(c(-1,1),13,replace=TRUE))$statistic) 
+tobserved = t.test(dif)$statistic 
+approx_pval = mean(abs(tstats) >= abs(tobserved))
+approx_pval
+                  
+```
+
+####1c) There's a significant difference between the intervention and external comparison as the p-value is lesser than 0.05.
+
+####1d)
+```{r}
+hist(tstats, main = "randomization distribution t-stat", freq = FALSE, breaks = 30, ylim = c(0, 0.5))
+lines(seq(-4,4,len=100), dt(seq(-4,4,len=100), df = 5))
+abline(v = c(tobserved,-tobserved), lty=2)
+```
+
+
+```{r}
+barley = read.csv("Barley1928.csv")
+table(barley$Block)
+```
+
+####2a) There are 5 blocks with a total of 30 experimental units.
+
+####2b)
+```{r}
+barley$Treatment = as.factor(barley$Treatment)
+fit = lm(formula = Yield ~ Block + Treatment, data = barley)
+summary(fit)
+```
+
+```{r}
+anova(fit)
+```
+
+####2c) Treatment effects are statistically significant because p-value < 0.05
+  
+####2d)
+```{r}
+TukeyHSD(aov(fit))$Treatment
+```
+
+####2e) Based on the Tukey intervals, 2-1, 3-1, 4-1, 5-1, 4-2, 5-2 are the pairs of treatments that have significantly different means
+
+```{r}
+spelling = read.csv("Spelling1941.csv")
+```
+
+####3a) the 2 blocking factors are "List" and "Group"
+
+```{r}
+matrix(spelling$Testing, nrow = 4, ncol = 4)
+```
+
+####3b) Column = List, Row = Group
+
+####3c)
+```{r}
+fit_2 = lm(formula = Number ~ List + factor(Group) + Testing, data = spelling)
+summary(fit_2)
+```
+
+```{r}
+anova(fit_2)
+```
+
+####3d) Treatment effects are statistically significant because p-value < 0.05
+
+####3e)
+```{r}
+TukeyHSD(aov(fit_2))$Testing
+```
+
+####3f) Based on the Tukey intervals, SD-MC, SW-MC, WS-MC  are the pairs of treatments that have significantly different means

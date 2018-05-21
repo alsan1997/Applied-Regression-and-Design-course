@@ -1,0 +1,46 @@
+---
+title: "HW 01b"
+author: "Aldo Sanjoto"
+date: "September 15, 2017"
+output: html_document
+---
+
+```{r}
+library("alr4")
+data("fuel2001")
+model = lm(formula = FuelC ~ Income + Pop + Tax, data = fuel2001)
+summary(model)
+
+```
+b)
+-
+-
+-
+-
+-
+c)
+-
+-
+-
+-
+-
+```{r}
+model_dri = lm(FuelC ~ Income + Pop + Tax + Drivers, data = fuel2001)
+summary(model_dri)
+```
+
+```{r}
+anova(model, model_dri)
+```
+-
+-
+-
+-
+f)
+-
+-
+-
+-
+-
+
+

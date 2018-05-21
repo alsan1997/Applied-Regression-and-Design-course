@@ -1,0 +1,161 @@
+---
+title: "HW5 STAT425"
+author: "Aldo Sanjoto"
+date: "November 10, 2017"
+output: html_document
+---
+
+```{r}
+#install.packages("alr4")
+library("alr4")
+library("MASS")
+data("ais")
+#head(ais)
+fit = lm(formula = Wt ~ Ht, data = ais)
+bc = boxcox(fit)
+bc$x[which.max(bc$y)]
+```
+
+####1a) It turns out lambda = 0.06060606, therefore, we would be using log-transformation.
+
+```{r}
+fit_ht = lm(formula = log(Wt) ~ Ht, data = ais)
+fit_loght = lm(formula = log(Wt) ~ log(Ht), data = ais)
+fit_ht_RSS = sum(fit_ht$residuals^2)
+fit_loght_RSS = sum(fit_loght$residuals^2)
+fit_ht_RSS
+fit_loght_RSS
+```
+
+####1b) Model with ht variable has RSS of 2.58568 and model with logh(ht) varibale has RSS of 2.529865, which has a smaller RSS.  
+
+```{r}
+fit_loght_sex = lm(formula = log(Wt) ~ log(Ht) + Sex + log(Ht)*Sex, data = ais)
+summary(fit_loght_sex)
+```
+
+####1c)The interaction term is not significant at 5%.
+
+####1d)
+```{r}
+plot(log(ais$Ht), log(ais$Wt), type="n", xlab="log(Ht)", ylab="log(Wt)") 
+with(ais, points(log(Ht[Sex ==0]), log(Wt[Sex==0]),col="green")) 
+with(ais, points(log(Ht[Sex ==1]), log(Wt[Sex==1]),col="blue")) 
+ 
+beta00 = fit_loght_sex$coefficients[1] 
+beta10 = fit_loght_sex$coefficients[2] 
+beta01 = fit_loght_sex$coefficients[1] + fit_loght_sex$coefficients[3] 
+beta11 = fit_loght_sex$coefficients[2] + fit_loght_sex$coefficients[4] 
+
+abline(beta00, beta10, col="green") 
+abline(beta01, beta11, col="blue") 
+
+legend(5, 4.7,legend=c("male", "female"), lty = 1:2, cex = 1, col = c("green", "blue"), title = "Line types", text.font = 4, bg = "pink")
+```
+
+```{r}
+fit_multiple = lm(formula = log(Wt) ~ log(Ht) + Sex, data = ais)
+summary(fit_multiple)
+```
+
+####1e) Sex is significant at 5% level.
+
+```{r}
+plot(log(ais$Ht), log(ais$Wt), type="n", xlab="log(Ht)", ylab="log(Wt)") 
+with(ais, points(log(Ht[Sex ==0]), log(Wt[Sex==0]),col="green")) 
+with(ais, points(log(Ht[Sex ==1]), log(Wt[Sex==1]),col="blue")) 
+
+male = fit_multiple$coefficients[1] 
+female = fit_multiple$coefficients[1]+ fit_multiple$coefficients[3] 
+slope = fit_multiple$coefficients[2] 
+
+abline(male, slope, col="green") 
+abline(female, slope, col="blue") 
+
+legend(5, 4.7,legend=c("male", "female"), lty = 1:2, cex = 1, col = c("green", "blue"), title = "Line types", text.font = 4, bg = "pink")
+```
+
+####1f) The Male's line is higher. 
+
+```{r}
+data("turk0")
+table(turk0$A)
+```
+
+####2a) The design is not balanced. In the first column it has 10 experimental units while others only 5.
+
+####2b)
+```{r}
+fit_turk = lm(formula = Gain ~ factor(A), data = turk0)
+summary(fit_turk)
+```
+
+```{r}
+par(mfrow=c(2,2))   
+plot(fit_turk, cex = 1)
+```
+
+####2c) The plot of Residuals vs Fitted and Scale-location show a roughly flat trend indicating linearity and homoscedasticity. Normal Q-Q plot also approximates into a straight line indicating no problem.  
+
+####2d) ANOVA table
+```{r}
+anova(fit_turk)
+```
+
+####2e) We can see that p-value is significant at 5% level (REJECT NULL). So we know at least one group has a significant differences.
+
+####2f) simultaneous 95% CI for all mean differences between pairs of groups
+```{r}
+TukeyHSD(aov(fit_turk))
+```
+
+####2g) All pairs have significantly different means except for (0.16-0.1) and (0.44-0.28).
+
+```{r}
+pine = read.table("pine.dat", header = TRUE)
+#View(pine)
+table(pine[,c("shape","trt")])
+```
+
+####3a) It's a balanced design with equal experimental units (3).
+
+####3b) Summary Model
+```{r}
+fit_pine = lm(formula = y ~ factor(shape) * factor(trt), data = pine)
+summary(fit_pine)
+```
+
+```{r}
+par(mfrow=c(2,2))   
+plot(fit_pine, cex = 1)
+```
+
+####3c) In the scale-location plot, the trend is not flat suggesting non-linearity and heteroscadastisity.
+
+```{r}
+bc = boxcox(fit_pine)
+bc$x[which.max(bc$y)]
+```
+
+####3d) It turns out lambda = 0.4242424, therefore, we would be using square root transformation.
+
+####3e) Square root transformation model
+```{r}
+fit_pinesr = lm(formula = sqrt(y) ~ factor(shape) * factor(trt), data = pine)
+summary(fit_pinesr)
+```
+
+####3f) Interaction plot
+```{r}
+interaction.plot(pine$shape, pine$trt, sqrt(pine$y), trace.label = "treatment", xlab = "Shape", ylab = "response")
+```
+
+####3g) ANOVA table
+```{r}
+anova(fit_pinesr)
+```
+
+####3h) The interaction term is not significant at 5% level. 
+
+####3i) Altough, shape and trt are both significant at 5% level, we still need to test for main effect since interaction term is not signifcant. Since this is a balanced design, the F-test for main effects is valid.
+

@@ -1,0 +1,134 @@
+---
+title: "hw2"
+author: "Aldo Sanjoto"
+date: "September 27, 2017"
+output: html_document
+---
+
+####1a)
+```{r} 
+library("alr4")
+data("stopping")
+#head(stopping)
+#??stopping
+model = lm(formula = Distance ~ Speed, data = stopping)
+summary(model)
+par(mfrow=c(2,2))
+plot(model, add.smooth = FALSE)
+```
+ 
+####1b) There is slightly a curvature in the Residuals vs Fitted plot however the points are not evenly distributed. Thus, mean function might not be appropriate.
+
+####1c) There's no problem with the constant variance since in the Scale vs Location plot, trend is roughly flat (constant).
+
+```{r}
+model$fitted.values[which.max(model$residuals)]
+
+model$fitted.values[which.min(model$residuals)]
+
+residuals(model)
+```
+
+####1d) Largest residual: 60th value: 35.6078272, Smallest residual: 41st value: -25.4095174
+
+```{r}
+#hatvalues(model)
+hatvalues(model)[which.max(hatvalues(model))]
+```
+####1e) 61th has the largest leverage value with 0.08967251
+
+####1f) 60th value might be the outlier since it is the furthest from the other points in the plot.
+
+```{r}
+#cooks distance
+which(cooks.distance(model) >= 1)
+plot(cooks.distance(model), type = "h")
+```
+
+
+####1g) Based on the plot above, no value is greater than 1 thus no influential points. 
+
+####2a)
+```{r}
+data("drugcost")
+head(drugcost)
+model2 = lm(formula = COST ~ RXPM + GS + RI + COPAY + AGE + F + MM, data = drugcost)
+par(mfrow=c(2,2))
+plot(model2, add.smooth = FALSE)
+
+```
+
+####2b) The trend is roughly flat in the Residual vs Fitted plot. Thus, mean function might be appropriate.
+
+####2c) There's no problem with the constant variance since in the Scale vs Location plot, trend is roughly flat (constant).
+
+```{r}
+match(max(residuals(model2)), residuals(model2))
+fitted.values(model2)[match(max(residuals(model2)), residuals(model2))]
+
+match(min(residuals(model2)), residuals(model2))
+fitted.values(model2)[match(min(residuals(model2)), residuals(model2))]
+
+residuals(model2)
+```
+####2d) Largest residual: 29th value: 0.122522528, Smallest residual: 10th value: -0.142888039
+
+
+```{r}
+hatvalues(model2)[which.max(hatvalues(model2))]
+```
+
+####2e) DE has the largest leverage value with 0.6553194
+
+####2f) DE is the outlier because it is the furthest from the other of the points in the plot.
+
+```{r}
+which(cooks.distance(model2) >= 1)
+plot(cooks.distance(model2), type = "h")
+```
+
+####2g) Based on the plot above, there exist a value that is greater than 1 thus there is a influential point.
+
+
+####3a)
+```{r}
+data("fuel2001")
+head(fuel2001)
+model3 = lm(formula = FuelC ~ Tax + Drivers + Income, data = fuel2001)
+y = rstandard(model3)
+x = model3$residuals
+par(mfrow=c(1,1))
+plot(x, y, xlab="ordinary residuals",ylab="standardized residuals")
+            
+```
+
+####3b) Points in the plot do not exactly fall on a straightline indicates there might be an error in the independent and identically distributed normal. 
+
+####3c)
+```{r}
+rstudent(model3)
+```
+```{r}
+values = qt(0.05, df = df.residual(model3) - 1, lower = FALSE)
+studentized = rstudent(model3)
+which(abs(studentized) > values)
+```
+####3d) FL, NY, TX states are considered as outliers. 
+
+```{r}
+values2 = qt(0.05/(2*nobs(model3)), df = df.residual(model3) - 1, lower = FALSE)
+which(abs(studentized) > values2)
+```
+####3e) NY, TX states are considered as outliers. 
+
+
+####4a)
+```{r}
+par(pty = "s")
+par(mfrow = c(3,3))
+for(i in 1:9){qqnorm(rgeom(50,0.4))}
+```
+
+####4b) What makes the above plots different with normally-distributed data:
+####First difference: The shape is kind of curvy.
+####Second difference: All plots have gap between the points which means it is step graphs.

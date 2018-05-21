@@ -1,0 +1,149 @@
+---
+title: "hw3 stat425"
+author: "Aldo Sanjoto"
+date: "October 13, 2017"
+output: html_document
+---
+
+####1a)
+```{r}
+library("alr4")
+data("MinnWater")
+pairs(MinnWater)
+#??Minnwater
+```
+
+####1b) Year, statePop, muniPop
+
+####1c)
+```{r}
+fit_mw = lm(formula = muniUse ~ ., data = MinnWater)
+summary(fit_mw)
+```
+
+```{r}
+vif(fit_mw)
+```
+
+####1d) the variable year, allUse, irrUse, statePop, muniPop have a VIF indicating a possible problem.
+
+
+```{r}
+fit_mw2 = lm(formula = muniUse ~ allUse + irrUse + muniPrecip + statePop, data = MinnWater)
+summary(fit_mw2)
+```
+
+####1e) Only the variable muniPrecip is not significant at level 5%
+
+```{r}
+vif(fit_mw2)
+```
+
+####1f) compared to the VIF in 1e, the VIF decreased. The variables muniPrecip and statePop have a VIF indicating a problem.
+
+####2a)
+```{r}
+age = c(1, 2, 3, 4, 5)
+number = c(123, 78, 32, 17, 24)
+average_weight = c(7.9725, 7.9503, 7.9276, 7.8962, 7.8730)
+std = c(0.01409, 0.02272, 0.03426, 0.04057, 0.05353)
+money = data.frame(age, number, average_weight, std)
+#View(money)
+fit_money = lm(formula = average_weight ~ age, data = money)
+summary(fit_money)
+
+```
+
+```{r}
+confint(fit_money, "age")
+```
+
+####2b) the 95% confidence interval for the regression slope is -0.02820043 to -0.02241957
+
+```{r}
+fit_money2 = lm(formula = average_weight ~ age, data = money, weights = money$number)
+summary(fit_money2)
+```
+
+```{r}
+weight =  c(123, 78, 32, 17, 24)
+w = diag(weight, ncol = 5, nrow = 5)
+
+print("Weight matrix:")
+print(w)
+
+s = solve(w)
+print("Sigma matrix:")
+print(s)
+
+```
+####2d) The weight is a diagonal matrix with its element is equal to numbers respectively, the sigma matrix is the inverse of weight matrix 
+
+```{r}
+confint(fit_money2, "age")
+```
+
+####2e) the 95% confidence interval is from -0.0273745 to -0.02201086
+
+####2f)
+```{r}
+fit_money3 = lm(formula = average_weight ~ age, data = money, weights = (money$number / (money$std^2)))
+summary(fit_money3)
+```
+```{r}
+weight2 = c(619559.6942, 151104.6915, 27263.10154, 10328.53929, 8375.615944)
+w2 = diag(weight2, ncol = 5, nrow = 5)
+
+print("Weight matrix:")
+print(w2)
+
+s2 = solve(w2)
+print("Sigma matrix:")
+print(s2)
+```
+
+####2g) The weight is a diagonal matrix with its element is equal to numbers/(std^2) respectively, the sigma matrix is the inverse of weight matrix 
+
+```{r}
+confint(fit_money3, "age")
+```
+####2h) the 95% confidence interval is from -0.02655593 to -0.02095642
+
+
+####3a)
+```{r}
+data("lakemary")
+#head(lakemary)
+fit_lm = lm(formula = Length ~ Age, data = lakemary)
+summary(fit_lm)
+```
+
+####3b)
+```{r}
+plot(lakemary$Age, lakemary$Length, xlab="Age (years)", ylab ="Length(mm)")
+abline(fit_lm)
+```
+
+####3c) Because there are repeated data observation of the same number of Age.
+
+
+```{r}
+fit_lm_lof = lm(formula = Length ~ factor(Age), data = lakemary)
+anova(fit_lm, fit_lm_lof)
+```
+
+####3d) from the lack-of-fit anova model, we can see that the pvalue 0.0002125 is really small so we decide to reject the null. Thus, the model is insufficient.
+
+####3e) the estimate pure error variance is 8812.7/72 = 122.4
+
+####3f)
+```{r}
+fit_lm2 = lm(formula = Length ~ Age + I(Age^2), data = lakemary)
+summary(fit_lm2)
+```
+
+```{r}
+anova(fit_lm2, fit_lm_lof)
+```
+
+####3g) from the lack-of-fit anova model, we can see that the pvalue 0.8295 is quite large so we fail to reject the null. Thus, the quadratic model is a sufficient model.

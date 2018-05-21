@@ -1,0 +1,51 @@
+---
+title: "hw 01"
+author: "Aldo Sanjoto"
+output: html_document
+---
+
+```{r}
+#install.packages("alr4")
+library("alr4")
+data("ais")
+head(ais)
+```
+ 
+ 
+```{r}
+model = lm(formula = Wt ~ Sex + Ht + SSF + Bfat, data = ais)
+summary(model)
+```
+b) 
+-
+-
+-
+```{r}
+summary(model)$r.squared
+```
+
+```{r}
+which.max(model$residuals)
+model$fitted.values[which.max(model$residuals)]
+```
+e)
+-
+-
+-
+- 
+f)
+-
+```{r}
+confint(model)
+```
+```{r}
+#default is 5% siglevel
+new_data = data.frame(Sex = 1, Ht = 170, SSF = 60, Bfat = 12)
+predict.lm(model, newdata = new_data, interval = 'prediction')
+```
+
+```{r}
+model_new = lm(Wt ~ Sex + Ht, data = ais)
+anova(model, model_new)
+```
+

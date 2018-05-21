@@ -1,0 +1,154 @@
+---
+title: "HW4 STAT425"
+author: "Aldo Sanjoto"
+date: "Friday, October 27, 2017"
+output: html_document
+---
+
+
+```{r}
+library("alr4")
+data("lathe1")
+#head(lathe1)
+fit_sop = lm(formula = Life ~ Speed*Feed + I(Feed^2) + I(Speed^2), data = lathe1)
+summary(fit_sop)
+```
+
+####1a) The interation term appear to be significant at 5% level.
+
+####1b) The diagnostic plots for fit_sop:
+```{r}
+par(mfrow=c(2,2)) 
+plot(fit_sop, cex = 1)
+```
+
+####1c) 
+####-As we can see in the Residual vs Fitted plot, the trend is not flat suggesting that it is non-linear and non-constant variance (heteroscedasticity).
+####-In the Normal Q-Q plot, the points do not approximate a straight line suggesting there's a problem. 
+####-In Scale-Location plot, the trend is not flat, suggesting there are problems with variance (assumption is false for homoscedasticity)
+####-In the Residual vs Leverage plot, we can see that the 9th and 12th observation are influential points. 
+
+####1d) Box-cox log likelihood versus lambda plot:
+```{r}
+library("MASS")
+boxcox(fit_sop)
+```
+
+```{r}
+bc = boxcox(fit_sop, plotit = FALSE)
+bc$x[which.max(bc$y)]
+```
+
+####1e) The lambda value selected by the Box-cox procedure is approximately 0.1
+
+####1f) The most "simple" lambda value that is still within the confidence interval limits shown in the box-cox plot is 0. This corresponds to y -> ln(y) which is a log-transformation. 
+
+```{r}
+fit_log = lm(formula = log(Life) ~ Speed*Feed + I(Feed^2) + I(Speed^2), data = lathe1)
+summary(fit_log)
+```
+
+####1g) The interaction term appear not to be significant at 5% level.
+
+```{r}
+par(mfrow=c(2,2)) 
+plot(fit_log, cex = 1)
+```
+
+####1h) From the above log-transformation diagnostic plot, we can observe that Residuals vs Fitted and Scale-location plots trend are roughly flat suggesting linearity and homoscedasticity (constant variance). The normal Q-Q points are forming a straight line suggesting no problems. Therefore, it has improved. Additionally, as we can see in the Residual vs Leverage plot, there are still influential points; 9th and 10th. 
+
+####2a) We make each of the variable to log base 10 which is equal to ln. By doing this, multiplication becomes addition. And power comes down in front of a variable...
+
+####The formula then becomes _ln(Volume) = ln(lowercase(gamma)) + beta1*ln(Girth) + beta2*ln(height) + ln(e)_
+
+####2b) Summary of linearized model
+```{r}
+data("trees")
+#head(trees)
+fit_linearized_tree = lm(formula = log(Volume) ~ log(Girth) + log(Height), data = trees)
+summary(fit_linearized_tree)
+```
+
+```{r}
+par(mfrow=c(2,2)) 
+plot(fit_linearized_tree, cex = 1)
+```
+
+####2c) The plot of Residuals vs Fitted and Scale-location show a roughly flat trend indicating linearity and homoscedasticity. Normal Q-Q plot also approximates into a straight line indicating no problem. As we can see, there are no influential points. 
+
+```{r}
+confint(fit_linearized_tree)
+```
+
+####2d) As we can observe, the 95% CI for Girth and Height contains its slope theoretical values which are beta1=2, beta2=1
+
+```{r}
+new_tree = data.frame(Girth = 10.9, Height = 75) 
+CI = predict(fit_linearized_tree, newdata = new_tree, interval = "prediction")
+print(CI)
+```
+
+####2e) Prediction value: 2.92763, with interval (2.75656, 3.0987)
+
+```{r}
+ori_CI = exp(CI)
+print(ori_CI)
+```
+
+####2f) Prediction value: 18.6833, with inteval (15.74559, 22.1691)
+
+
+
+####3a) Using Forward selection with Fin = 3, we have SSF and Sex as the final variables.
+```{r}
+data("ais")
+#head(ais)
+possible_pred = ~ Sex + Ht + Wt + LBM + BMI + SSF
+
+fit_forward = lm(formula = Bfat ~ 1, data = ais)
+add1(fit_forward, possible_pred, test = "F")
+```
+
+
+```{r}
+fit_forward = update(fit_forward, . ~ . + SSF)
+add1(fit_forward, possible_pred, test = "F") 
+```
+
+```{r}
+fit_forward = update(fit_forward, . ~ . + Sex)
+add1(fit_forward, possible_pred, test = "F")  
+
+```
+
+####3b) Using Backward selection with Fout = 3, we have Sex, Ht, Wt, LBM, SSF as the final variables.
+```{r}
+fit_backward = lm(Bfat ~ Sex + Ht + Wt + LBM + BMI + SSF, data = ais) 
+drop1(fit_backward, test="F")
+```
+
+```{r}
+fit_backward = update(fit_backward, .~. - BMI) 
+drop1(fit_backward, test="F")
+```
+
+####3c) Using Mallow Cp selection, we have Sex, Ht, Wt, LBM, SSF as the final variables.
+```{r}
+#install.packages("leaps")
+library(leaps)
+x = model.matrix(Bfat ~ Sex + Ht + Wt + LBM + BMI + SSF - 1, data = ais) 
+y = ais$Bfat 
+cp_mod = leaps(x, y, nbest=1)
+cp_mod
+
+```
+
+####3d) Using Stepwise selection we have Sex and SSF as the final variables.
+```{r}
+step(object= lm(Bfat ~ 1, data=ais), scope= ~ Sex + Ht + Wt + LBM + BMI + SSF, direction= "both")
+
+```
+
+ 
+
+
